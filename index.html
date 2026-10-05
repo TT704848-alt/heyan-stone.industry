@@ -127,8 +127,8 @@
             <h2 class="text-2xl font-bold border-l-4 border-brand-gold pl-3 mb-6 text-brand-dark">電子色版展示</h2>
             
             <div class="flex border-b border-gray-200 mb-6">
-                <button onclick="switchSampleTab('solid-surface')" id="tab-solid-surface" class="px-6 py-2 active-tab">人造石</button>
-                <button onclick="switchSampleTab('quartz')" id="tab-quartz" class="px-6 py-2 text-gray-500 hover:text-brand-gold">石英石</button>
+                <button onclick="switchSampleTab('solid-surface')" id="tab-solid-surface" class="px-6 py-2 text-gray-500 hover:text-brand-gold">人造石</button>
+                <button onclick="switchSampleTab('quartz')" id="tab-quartz" class="px-6 py-2 active-tab">石英石</button>
                 <button onclick="switchSampleTab('sintered-stone')" id="tab-sintered-stone" class="px-6 py-2 text-gray-500 hover:text-brand-gold">陶板</button>
             </div>
 
@@ -145,21 +145,27 @@
         let currentUnitPrice = 120;
         let currentMaterial = 'solid-surface';
 
-        // 設定各分頁的圖片配置（可根據您實際資料夾張數調整）
+        // 作品集圖片張數 (1.jpg ~ 6.jpg)
         const portfolioCount = 6;
 
+        // 設定各材質與子資料夾擁有的圖片張數
         const sampleConfig = {
-            'solid-surface': [{ folder: '', count: 20 }],
-            'quartz': [{ folder: '', count: 20 }],
+            'solid-surface': [
+                { folder: 'EG半版', count: 10 },
+                { folder: 'MQ半版', count: 10 },
+                { folder: 'QJ半版', count: 10 }
+            ],
+            'quartz': [
+                { folder: 'EG半版', count: 10 },
+                { folder: 'MQ半版', count: 10 },
+                { folder: 'QJ半版', count: 10 }
+            ],
             'sintered-stone': [
-                { folder: '', count: 10 },
                 { folder: 'EG半版', count: 10 },
                 { folder: 'MQ半版', count: 10 },
                 { folder: 'QJ半版', count: 10 }
             ]
         };
-
-        const extCandidates = ['.jpg', '.JPG', '.png', '.PNG', '.jpeg'];
 
         function switchMainTab(tabName) {
             document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
@@ -176,7 +182,7 @@
             });
 
             if (tabName === 'gallery') loadPortfolio();
-            if (tabName === 'samples') loadSamples('solid-surface');
+            if (tabName === 'samples') loadSamples('quartz'); // 預設開啟有圖片的石英石
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -248,57 +254,57 @@
             container.innerHTML = '';
 
             for (let i = 1; i <= portfolioCount; i++) {
-                tryLoadValidImage(`images/portfolio/${i}`, (validSrc) => {
+                const imgPath = `images/portfolio/${i}.jpg`;
+                const img = new Image();
+                img.src = imgPath;
+                img.onload = function() {
                     const div = document.createElement('div');
                     div.className = 'overflow-hidden rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow bg-gray-50';
-                    div.innerHTML = `<img src="${validSrc}" class="w-full h-56 object-cover hover:scale-105 transition-transform duration-300" alt="作品 ${i}">`;
+                    div.innerHTML = `<img src="${imgPath}" class="w-full h-56 object-cover hover:scale-105 transition-transform duration-300" alt="作品 ${i}">`;
                     container.appendChild(div);
-                });
+                };
             }
         }
 
-        // 載入電子色版
+        // 載入電子色版 (自動過濾隱藏未載入成功的照片)
         function loadSamples(type) {
             const container = document.getElementById('samples-container');
             container.innerHTML = '';
 
             const configs = sampleConfig[type] || [];
+            let loadedAny = false;
+
             configs.forEach(cfg => {
                 const folderPath = cfg.folder ? `${encodeURIComponent(cfg.folder)}/` : '';
                 for (let i = 1; i <= cfg.count; i++) {
-                    const basePath = `images/color-samples/${type}/${folderPath}${i}`;
+                    const imgPath = `images/color-samples/${type}/${folderPath}${i}.jpg`;
                     const labelText = cfg.folder ? `${cfg.folder} - 款式 ${i}` : `款式 ${i}`;
 
-                    tryLoadValidImage(basePath, (validSrc) => {
+                    const img = new Image();
+                    img.src = imgPath;
+                    img.onload = function() {
+                        loadedAny = true;
                         const div = document.createElement('div');
                         div.className = 'overflow-hidden rounded-lg shadow border border-gray-100 bg-white p-2 text-center';
                         div.innerHTML = `
-                            <img src="${validSrc}" class="w-full h-36 object-cover rounded mb-2" alt="${labelText}">
+                            <img src="${imgPath}" class="w-full h-36 object-cover rounded mb-2" alt="${labelText}">
                             <span class="text-xs text-gray-600 font-medium truncate block" title="${labelText}">${labelText}</span>
                         `;
                         container.appendChild(div);
-                    });
+                    };
                 }
             });
-        }
 
-        // 嘗試不同副檔名，找到真正存在的圖片才回傳並顯示
-        function tryLoadValidImage(basePathWithoutExt, onSuccess) {
-            let index = 0;
-            function checkNext() {
-                if (index >= extCandidates.length) return; // 試完都找不到就放棄（避免破圖）
-                const testSrc = basePathWithoutExt + extCandidates[index];
-                const img = new Image();
-                img.src = testSrc;
-                img.onload = function() {
-                    onSuccess(testSrc);
-                };
-                img.onerror = function() {
-                    index++;
-                    checkNext();
-                };
-            }
-            checkNext();
+            setTimeout(() => {
+                if (container.children.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-span-full text-center py-12 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                            <p class="text-lg font-medium">此類別尚無色版圖片</p>
+                            <p class="text-xs text-gray-400 mt-1">請上傳圖片至 images/color-samples/${type}/</p>
+                        </div>
+                    `;
+                }
+            }, 500);
         }
 
         // 初始化
