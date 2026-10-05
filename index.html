@@ -63,11 +63,10 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- 控制面板 -->
                 <div class="space-y-6">
-                    <!-- 石材種類選擇 -->
                     <div>
                         <label class="block font-medium mb-2">1. 選擇石材材質</label>
                         <div class="grid grid-cols-3 gap-3">
-                            <button onclick="selectMaterial('solid', 120)" id="mat-solid" class="mat-btn p-3 border-2 border-brand-gold bg-amber-50 rounded-lg text-center hover:border-brand-gold transition-all">
+                            <button onclick="selectMaterial('solid-surface', 120)" id="mat-solid-surface" class="mat-btn p-3 border-2 border-brand-gold bg-amber-50 rounded-lg text-center hover:border-brand-gold transition-all">
                                 <div class="font-bold">人造石</div>
                                 <div class="text-xs text-gray-500">基本款</div>
                             </button>
@@ -75,14 +74,13 @@
                                 <div class="font-bold">石英石</div>
                                 <div class="text-xs text-gray-500">耐磨抗刮</div>
                             </button>
-                            <button onclick="selectMaterial('sintered', 350)" id="mat-sintered" class="mat-btn p-3 border-2 border-gray-200 rounded-lg text-center hover:border-brand-gold transition-all">
+                            <button onclick="selectMaterial('sintered-stone', 350)" id="mat-sintered-stone" class="mat-btn p-3 border-2 border-gray-200 rounded-lg text-center hover:border-brand-gold transition-all">
                                 <div class="font-bold">陶板/薄板</div>
                                 <div class="text-xs text-gray-500">頂級耐熱</div>
                             </button>
                         </div>
                     </div>
 
-                    <!-- 尺寸輸入 -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block font-medium mb-1">長度 (cm)</label>
@@ -94,7 +92,6 @@
                         </div>
                     </div>
 
-                    <!-- 安裝方式 -->
                     <div>
                         <label class="block font-medium mb-2">2. 水槽工法/安裝方式</label>
                         <select id="input-install" onchange="calculatePrice()" class="w-full p-2 border rounded focus:ring-2 focus:ring-brand-gold outline-none">
@@ -104,7 +101,6 @@
                         </select>
                     </div>
 
-                    <!-- 試算結果 -->
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                         <div class="text-sm text-gray-500">預估總金額 (含基本安裝加工)</div>
                         <div class="text-3xl font-extrabold text-brand-gold mt-1" id="total-price">NT$ 0</div>
@@ -112,7 +108,7 @@
                     </div>
                 </div>
 
-                <!-- 2D工程示意圖 Canvas -->
+                <!-- 2D 示意圖 -->
                 <div class="flex flex-col items-center justify-center bg-brand-lightBg p-4 rounded-lg border border-gray-200">
                     <h3 class="text-sm font-semibold text-gray-600 mb-2">2D 規格與剖面示意圖</h3>
                     <canvas id="diagramCanvas" width="400" height="280" class="bg-white rounded border shadow-sm max-w-full"></canvas>
@@ -123,61 +119,53 @@
         <!-- 2. 實景作品集 Section -->
         <section id="page-gallery" class="page-section hidden bg-white rounded-xl shadow-md p-6 md:p-8">
             <h2 class="text-2xl font-bold border-l-4 border-brand-gold pl-3 mb-6 text-brand-dark">實景作品集</h2>
-            <div id="portfolio-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                <!-- JS 動態加載作品照片 -->
-            </div>
+            <div id="portfolio-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
         </section>
 
         <!-- 3. 電子色版 Section -->
         <section id="page-samples" class="page-section hidden bg-white rounded-xl shadow-md p-6 md:p-8">
             <h2 class="text-2xl font-bold border-l-4 border-brand-gold pl-3 mb-6 text-brand-dark">電子色版展示</h2>
             
-            <!-- 色版頁籤分類 -->
             <div class="flex border-b border-gray-200 mb-6">
-                <button onclick="switchSampleTab('solid')" id="tab-solid" class="px-6 py-2 active-tab">人造石</button>
+                <button onclick="switchSampleTab('solid-surface')" id="tab-solid-surface" class="px-6 py-2 active-tab">人造石</button>
                 <button onclick="switchSampleTab('quartz')" id="tab-quartz" class="px-6 py-2 text-gray-500 hover:text-brand-gold">石英石</button>
-                <button onclick="switchSampleTab('sintered')" id="tab-sintered" class="px-6 py-2 text-gray-500 hover:text-brand-gold">陶板</button>
+                <button onclick="switchSampleTab('sintered-stone')" id="tab-sintered-stone" class="px-6 py-2 text-gray-500 hover:text-brand-gold">陶板</button>
             </div>
 
-            <div id="samples-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                <!-- JS 動態加載色版照片 -->
-            </div>
+            <div id="samples-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
         </section>
 
     </main>
 
-    <!-- Footer -->
     <footer class="bg-brand-dark text-gray-400 text-center py-6 mt-12 text-sm border-t border-gray-700">
         <p>© 禾硯石業 HEYAN Inc. All Rights Reserved.</p>
     </footer>
 
-    <!-- Logic Script -->
     <script>
         let currentUnitPrice = 120;
-        let currentMaterial = 'solid';
+        let currentMaterial = 'solid-surface';
+        const MAX_SEARCH_COUNT = 50; // 最多搜尋 1~50.jpg
 
-        // 主分頁切換
+        // 定義子資料夾列表（如果有新增資料夾可以在這裡加上名稱）
+        const subFolders = ['', 'EG半版', 'MQ半版', 'QJ半版'];
+
         function switchMainTab(tabName) {
-            // 隱藏所有分頁內容
             document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
-            
-            // 顯示選擇的分頁
             const targetSection = document.getElementById(`page-${tabName}`);
             if (targetSection) targetSection.classList.remove('hidden');
 
-            // 更新導覽列樣式
             ['estimator', 'gallery', 'samples'].forEach(t => {
                 const navBtn = document.getElementById(`nav-${t}`);
                 if (navBtn) {
-                    if (t === tabName) {
-                        navBtn.className = 'px-4 py-2 rounded-md transition-colors nav-tab-active';
-                    } else {
-                        navBtn.className = 'px-4 py-2 rounded-md transition-colors text-gray-300 hover:text-white';
-                    }
+                    navBtn.className = (t === tabName) 
+                        ? 'px-4 py-2 rounded-md transition-colors nav-tab-active'
+                        : 'px-4 py-2 rounded-md transition-colors text-gray-300 hover:text-white';
                 }
             });
 
-            // 滾動回頂部
+            if (tabName === 'gallery') loadPortfolio();
+            if (tabName === 'samples') loadSamples('solid-surface');
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -235,80 +223,63 @@
         }
 
         function switchSampleTab(type) {
-            ['solid', 'quartz', 'sintered'].forEach(t => {
+            ['solid-surface', 'quartz', 'sintered-stone'].forEach(t => {
                 const tab = document.getElementById(`tab-${t}`);
                 if (tab) tab.className = t === type ? 'px-6 py-2 active-tab' : 'px-6 py-2 text-gray-500 hover:text-brand-gold';
             });
             loadSamples(type);
         }
 
+        // 載入作品集圖片
         function loadPortfolio() {
             const container = document.getElementById('portfolio-container');
             container.innerHTML = '';
-            const maxCheck = 15;
 
-            for (let i = 1; i <= maxCheck; i++) {
-                ['jpg', 'png', 'jpeg', 'webp'].forEach(ext => {
-                    const imgPath = `images/portfolio/${i}.${ext}`;
-                    const img = new Image();
-                    img.src = imgPath;
-                    img.onload = function() {
-                        const div = document.createElement('div');
-                        div.className = 'overflow-hidden rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow bg-gray-50';
-                        div.innerHTML = `<img src="${imgPath}" class="w-full h-56 object-cover hover:scale-105 transition-transform duration-300" alt="實景作品">`;
-                        container.appendChild(div);
-                    };
+            for (let i = 1; i <= MAX_SEARCH_COUNT; i++) {
+                const imgPath = `images/portfolio/${i}.jpg`;
+                tryLoadImage(imgPath, (src) => {
+                    const div = document.createElement('div');
+                    div.className = 'overflow-hidden rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow bg-gray-50';
+                    div.innerHTML = `<img src="${src}" class="w-full h-56 object-cover hover:scale-105 transition-transform duration-300" alt="作品 ${i}">`;
+                    container.appendChild(div);
                 });
             }
-
-            setTimeout(() => {
-                if (container.children.length === 0) {
-                    container.innerHTML = `
-                        <div class="col-span-full text-center py-12 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                            <p class="text-lg font-medium">暫無作品照片</p>
-                        </div>
-                    `;
-                }
-            }, 800);
         }
 
+        // 載入電子色版圖片（會同時搜尋根目錄與 EG半版、MQ半版、QJ半版 等子資料夾）
         function loadSamples(type) {
             const container = document.getElementById('samples-container');
             container.innerHTML = '';
-            const maxCheck = 20;
 
-            for (let i = 1; i <= maxCheck; i++) {
-                ['jpg', 'png', 'jpeg', 'webp'].forEach(ext => {
-                    const imgPath = `images/color-samples/${type}/${i}.${ext}`;
-                    const img = new Image();
-                    img.src = imgPath;
-                    img.onload = function() {
+            subFolders.forEach(sub => {
+                const subPath = sub ? `${sub}/` : '';
+                for (let i = 1; i <= MAX_SEARCH_COUNT; i++) {
+                    const imgPath = `images/color-samples/${type}/${subPath}${i}.jpg`;
+                    tryLoadImage(imgPath, (src) => {
+                        const labelText = sub ? `${sub} - 款式 ${i}` : `樣品款 ${i}`;
                         const div = document.createElement('div');
                         div.className = 'overflow-hidden rounded-lg shadow border border-gray-100 bg-white p-2 text-center';
                         div.innerHTML = `
-                            <img src="${imgPath}" class="w-full h-36 object-cover rounded mb-2" alt="色版展示">
-                            <span class="text-xs text-gray-500 font-medium">編號 #${i}</span>
+                            <img src="${src}" class="w-full h-36 object-cover rounded mb-2" alt="${labelText}">
+                            <span class="text-xs text-gray-600 font-medium truncate block" title="${labelText}">${labelText}</span>
                         `;
                         container.appendChild(div);
-                    };
-                });
-            }
-
-            setTimeout(() => {
-                if (container.children.length === 0) {
-                    container.innerHTML = `
-                        <div class="col-span-full text-center py-12 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                            <p class="text-lg font-medium">此類別尚無色版圖片</p>
-                        </div>
-                    `;
+                    });
                 }
-            }, 800);
+            });
+        }
+
+        // 工具函式：嘗試載入圖片，成功才執行 callback
+        function tryLoadImage(src, onSuccess) {
+            const img = new Image();
+            img.src = encodeURI(src);
+            img.onload = function() {
+                onSuccess(encodeURI(src));
+            };
         }
 
         // 初始化
-        selectMaterial('solid', 120);
-        loadPortfolio();
-        loadSamples('solid');
+        selectMaterial('solid-surface', 120);
     </script>
 </body>
 </html>
