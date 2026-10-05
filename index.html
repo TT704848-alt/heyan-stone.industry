@@ -28,30 +28,36 @@
             color: #E29D29;
             font-weight: bold;
         }
+        .nav-tab-active {
+            background-color: #E29D29;
+            color: #33363B;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex flex-col">
 
     <!-- Header / Navbar -->
     <header class="bg-brand-dark text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-brand-gold rounded flex items-center justify-center text-brand-dark font-black text-xl">禾</div>
                 <h1 class="text-xl md:text-2xl font-bold tracking-wide">禾硯石業 <span class="text-xs md:text-sm text-gray-300 font-normal">| 石材估價與電子色版展示</span></h1>
             </div>
-            <nav class="hidden md:flex space-x-6 text-sm font-medium">
-                <a href="#estimator" class="hover:text-brand-gold transition-colors">線上估價系統</a>
-                <a href="#gallery" class="hover:text-brand-gold transition-colors">實景作品集</a>
-                <a href="#samples" class="hover:text-brand-gold transition-colors">電子色版</a>
+            <!-- 主頁籤選單 -->
+            <nav class="flex space-x-2 text-sm font-medium bg-gray-800 p-1 rounded-lg">
+                <button onclick="switchMainTab('estimator')" id="nav-estimator" class="px-4 py-2 rounded-md transition-colors nav-tab-active">線上估價系統</button>
+                <button onclick="switchMainTab('gallery')" id="nav-gallery" class="px-4 py-2 rounded-md transition-colors text-gray-300 hover:text-white">實景作品集</button>
+                <button onclick="switchMainTab('samples')" id="nav-samples" class="px-4 py-2 rounded-md transition-colors text-gray-300 hover:text-white">電子色版</button>
             </nav>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-12">
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
 
         <!-- 1. 線上估價系統 Section -->
-        <section id="estimator" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <section id="page-estimator" class="page-section bg-white rounded-xl shadow-md p-6 md:p-8">
             <h2 class="text-2xl font-bold border-l-4 border-brand-gold pl-3 mb-6 text-brand-dark">線上石材估價系統</h2>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -115,15 +121,15 @@
         </section>
 
         <!-- 2. 實景作品集 Section -->
-        <section id="gallery" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <section id="page-gallery" class="page-section hidden bg-white rounded-xl shadow-md p-6 md:p-8">
             <h2 class="text-2xl font-bold border-l-4 border-brand-gold pl-3 mb-6 text-brand-dark">實景作品集</h2>
             <div id="portfolio-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                <!-- JS 動態加載 -->
+                <!-- JS 動態加載作品照片 -->
             </div>
         </section>
 
         <!-- 3. 電子色版 Section -->
-        <section id="samples" class="bg-white rounded-xl shadow-md p-6 md:p-8">
+        <section id="page-samples" class="page-section hidden bg-white rounded-xl shadow-md p-6 md:p-8">
             <h2 class="text-2xl font-bold border-l-4 border-brand-gold pl-3 mb-6 text-brand-dark">電子色版展示</h2>
             
             <!-- 色版頁籤分類 -->
@@ -134,7 +140,7 @@
             </div>
 
             <div id="samples-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                <!-- JS 動態加載 -->
+                <!-- JS 動態加載色版照片 -->
             </div>
         </section>
 
@@ -149,6 +155,31 @@
     <script>
         let currentUnitPrice = 120;
         let currentMaterial = 'solid';
+
+        // 主分頁切換
+        function switchMainTab(tabName) {
+            // 隱藏所有分頁內容
+            document.querySelectorAll('.page-section').forEach(sec => sec.classList.add('hidden'));
+            
+            // 顯示選擇的分頁
+            const targetSection = document.getElementById(`page-${tabName}`);
+            if (targetSection) targetSection.classList.remove('hidden');
+
+            // 更新導覽列樣式
+            ['estimator', 'gallery', 'samples'].forEach(t => {
+                const navBtn = document.getElementById(`nav-${t}`);
+                if (navBtn) {
+                    if (t === tabName) {
+                        navBtn.className = 'px-4 py-2 rounded-md transition-colors nav-tab-active';
+                    } else {
+                        navBtn.className = 'px-4 py-2 rounded-md transition-colors text-gray-300 hover:text-white';
+                    }
+                }
+            });
+
+            // 滾動回頂部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
         function selectMaterial(mat, price) {
             currentMaterial = mat;
@@ -211,12 +242,10 @@
             loadSamples(type);
         }
 
-        // 嘗試加載圖片 (支援 .jpg, .jpeg, .png, .webp)
         function loadPortfolio() {
             const container = document.getElementById('portfolio-container');
             container.innerHTML = '';
-            let loadedCount = 0;
-            const maxCheck = 15; // 檢查上限
+            const maxCheck = 15;
 
             for (let i = 1; i <= maxCheck; i++) {
                 ['jpg', 'png', 'jpeg', 'webp'].forEach(ext => {
@@ -224,7 +253,6 @@
                     const img = new Image();
                     img.src = imgPath;
                     img.onload = function() {
-                        loadedCount++;
                         const div = document.createElement('div');
                         div.className = 'overflow-hidden rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow bg-gray-50';
                         div.innerHTML = `<img src="${imgPath}" class="w-full h-56 object-cover hover:scale-105 transition-transform duration-300" alt="實景作品">`;
