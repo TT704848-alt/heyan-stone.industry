@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>禾硯石業 HEYAN - 2D石材估價與工程展示系統</title>
+    <style>
+        :root {
+            --bg-dark: #33363B;
+            --accent-gold: #E29D29;
+            --accent-gold-hover: #C8861F;
+            --bg-light: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-dark: #1E2022;
+            --text-muted: #6C757D;
+            --border-color: #E2E8F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        header {
+            background-color: var(--bg-dark);
+            color: #FFFFFF;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--accent-gold);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-badge {
+            background: var(--accent-gold);
+            color: #FFF;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 1.1rem;
+        }
+
+        nav {
+            display: flex;
+            gap: 0.4rem;
+            width: auto;
+        }
+
+        nav button {
+            background: transparent;
+            border: 1px solid var(--accent-gold);
+            color: white;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        nav button.active, nav button:hover {
+            background: var(--accent-gold);
+            color: #fff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.25rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.15rem;
+            margin-bottom: 1rem;
+            color: var(--bg-dark);
+            border-left: 4px solid var(--accent-gold);
+            padding-left: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            font-size: 0.95rem;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 0.75rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            background-color: #FFF;
+        }
+
+        input[type="number"]:focus, select:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .row > div {
+            flex: 1;
+        }
+
+        .notice-box {
+            background-color: #FFF8EB;
+            border: 1px solid var(--accent-gold);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .notice-text {
+            color: #8A5A00;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-contact {
+            background-color: var(--accent-gold);
+            color: white;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .btn-contact:hover {
+            background-color: var(--accent-gold-hover);
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            background: #FAFAFA;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            display: block;
+        }
+
+        .summary-box {
+            background-color: var(--bg-dark);
+            color: white;
+            padding: 1.2rem;
+            border-radius: 6px;
+            margin-top: 1.2rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #555;
+            padding-top: 0.8rem;
+            margin-top: 0.8rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--accent-gold);
+        }
+
+        /* 相片牆與分類按鈕 */
+        .color-category-filter {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .filter-btn {
+            background: none;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            color: #FFFFFF;
+            background-color: var(--accent-gold);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .gallery-item {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-info {
+            padding: 0.6rem;
+            text-align: center;
+        }
+
+        .gallery-title {
+            font-weight: bold;
+            color: var(--bg-dark);
+            font-size: 0.85rem;
+        }
+
+        .empty-gallery-msg {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+            background: #fff;
+            border-radius: 8px;
+            border: 2px dashed var(--border-color);
+            grid-column: 1 / -1;
+            font-size: 0.9rem;
+        }
+
+        /* RWD 手機版斷點調整 */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 0.8rem 1rem;
+            }
+
+            nav {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            nav button {
+                flex: 1;
+                padding: 0.5rem 0.2rem;
+                font-size: 0.82rem;
+                text-align: center;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .container {
+                margin: 1rem auto;
+                padding: 0 0.8rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 0.8rem;
+            }
+
+            .gallery-item img {
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <div class="logo-badge">HY</div>
+            <div>
+                <h1 style="font-size: 1.2rem;">禾硯石業有限公司</h1>
+                <p style="font-size: 0.75rem; opacity: 0.8;">HEYAN Inc.</p>
+            </div>
+        </div>
+        <nav>
+            <button class="active" onclick="switchTab('estimateTab', event)">線上估價</button>
+            <button onclick="switchTab('portfolioTab', event)">精選作品</button>
+            <button onclick="switchTab('colorTab', event)">電子色版</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- 頁籤一：線上估價系統 -->
+        <div id="estimateTab" class="tab-content active">
+            <div class="grid-2">
+                <!-- 控制選單區 -->
+                <div class="card">
+                    <h2>1. 選擇石材與規格</h2>
+                    <div class="form-group">
+                        <label for="stoneType">石材種類</label>
+                        <select id="stoneType" onchange="calculate()">
+                            <option value="280">人造石 ($280 / 才)</option>
+                            <option value="450" selected>石英石 ($450 / 才)</option>
+                            <option value="580">岩板 ($580 / 才)</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="length">檯面長度 (cm)</label>
+                            <input type="number" id="length" value="300" min="50" max="600" oninput="calculate()">
+                        </div>
+                        <div class="form-group">
+                            <label for="width">檯面深度 (cm)</label>
+                            <input type="number" id="width" value="65" min="30" max="150" oninput="calculate()">
+                        </div>
+                    </div>
+
+                    <h2>2. 水槽與加工設定</h2>
+                    <div class="form-group">
+                        <label for="sinkInstall">水槽安裝方式</label>
+                        <select id="sinkInstall" onchange="calculate()">
+                            <option value="2500" selected>下嵌式 (+$2,500 工費)</option>
+                            <option value="1500">上嵌式 (+$1,500 工費)</option>
+                            <option value="4000">平接式 (+$4,000 精密洗溝)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edgeProfile">邊角形狀</label>
+                        <select id="edgeProfile" onchange="calculate()">
+                            <option value="0">直角 / 標準磨邊</option>
+                            <option value="50" selected>小斜倒角 Chamfer (+$50/才)</option>
+                            <option value="120">45度密縫對接 (+$120/才)</option>
+                        </select>
+                    </div>
+
+                    <div class="notice-box">
+                        <div>
+                            <div class="notice-text">💡 包含圓弧或特殊造型？</div>
+                            <div style="font-size: 0.8rem; color: #666;">特殊造型請聯絡專人現場量測報價</div>
+                        </div>
+                        <a href="tel:0226182669" class="btn-contact">聯絡專人</a>
+                    </div>
+                </div>
+
+                <!-- 2D 平面與剖面預覽區 -->
+                <div class="card">
+                    <h2>2D 平面工程示意圖</h2>
+                    <canvas id="canvas2D" width="500" height="260"></canvas>
+
+                    <h2 style="margin-top: 1.2rem;">工法結構剖面圖</h2>
+                    <canvas id="canvasSection" width="500" height="140"></canvas>
+
+                    <div class="summary-box">
+                        <div class="summary-item">
+                            <span>估算總才數：</span>
+                            <span id="totalCai">0 才</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>石材材料費：</span>
+                            <span id="stonePrice">$0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>邊角加工費：</span>
+                            <span id="edgePrice">$0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>水槽安裝開孔費：</span>
+                            <span id="sinkPrice">$0</span>
+                        </div>
+                        <div class="summary-total">
+                            <span>預估總金額：</span>
+                            <span id="totalPrice">$0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 頁籤二：作品展示區 -->
+        <div id="portfolioTab" class="tab-content">
+            <div class="card">
+                <h2>實景作品集</h2>
+                <p style="color: var(--text-muted); margin-bottom: 0.8rem; font-size: 0.85rem;">將照片放置於 <code>images/portfolio/</code> 資料夾中（檔名如 1.jpg, 2.jpg...）</p>
+                <div id="portfolioGallery" class="gallery-grid"></div>
+            </div>
+        </div>
+
+        <!-- 頁籤三：電子色版目錄 -->
+        <div id="colorTab" class="tab-content">
+            <div class="card">
+                <h2>石材電子色版目錄</h2>
+                <div class="color-category-filter">
+                    <button class="filter-btn active" onclick="filterColor('quartz', event)">進口石英石</button>
+                    <button class="filter-btn" onclick="filterColor('solid-surface', event)">韓國人造石</button>
+                    <button class="filter-btn" onclick="filterColor('sintered-stone', event)">質感岩板</button>
+                </div>
+                <div id="colorGallery" class="gallery-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabId, evt) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            if(evt) evt.target.classList.add('active');
+
+            if(tabId === 'portfolioTab') loadPortfolio();
+            if(tabId === 'colorTab') filterColor('quartz');
+        }
+
+        function loadPortfolio() {
+            const container = document.getElementById('portfolioGallery');
+            container.innerHTML = '';
+            let loadedCount = 0;
+
+            for (let i = 1; i <= 12; i++) {
+                const imgPath = `images/portfolio/${i}.jpg`;
+                const img = new Image();
+                img.src = imgPath;
+                img.onload = function() {
+                    loadedCount++;
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+                    item.innerHTML = `
+                        <img src="${imgPath}" alt="禾硯工程作品 ${i}">
+                        <div class="gallery-info">
+                            <div class="gallery-title">作品 #${i}</div>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                };
+            }
+
+            setTimeout(() => {
+                if (loadedCount === 0) {
+                    container.innerHTML = `
+                        <div class="empty-gallery-msg">
+                            <h3>尚未偵測到作品照片</h3>
+                            <p>請將照片放入 <code>images/portfolio/</code> 資料夾並命名為 <b>1.jpg, 2.jpg...</b></p>
+                        </div>
+                    `;
+                }
+            }, 300);
+        }
+
+        function filterColor(category, evt) {
+            if(evt) {
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                evt.target.classList.add('active');
+            }
+
+            const container = document.getElementById('colorGallery');
+            container.innerHTML = '';
+            let loadedCount = 0;
+
+            for (let i = 1; i <= 15; i++) {
+                const imgPath = `images/color-samples/${category}/${i}.jpg`;
+                const img = new Image();
+                img.src = imgPath;
+                img.onload = function() {
+                    loadedCount++;
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+                    item.innerHTML = `
+                        <img src="${imgPath}" alt="色版 ${i}">
+                        <div class="gallery-info">
+                            <div class="gallery-title">色號 #${i}</div>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                };
+            }
+
+            setTimeout(() => {
+                if (loadedCount === 0) {
+                    container.innerHTML = `
+                        <div class="empty-gallery-msg">
+                            <h3>此類別尚無色版圖片</h3>
+                            <p>請將照片放入 <code>images/color-samples/${category}/</code> 資料夾並命名為 <b>1.jpg, 2.jpg...</b></p>
+                        </div>
+                    `;
+                }
+            }, 300);
+        }
+
+        function calculate() {
+            const length = parseFloat(document.getElementById('length').value) || 0;
+            const width = parseFloat(document.getElementById('width').value) || 0;
+            const stoneUnit = parseFloat(document.getElementById('stoneType').value);
+            const sinkPrice = parseFloat(document.getElementById('sinkInstall').value);
+            const edgeUnit = parseFloat(document.getElementById('edgeProfile').value);
+
+            const cai = Math.ceil((length * width) / 900);
+            const stonePrice = cai * stoneUnit;
+            const edgePrice = cai * edgeUnit;
+            const totalPrice = stonePrice + edgePrice + sinkPrice;
+
+            document.getElementById('totalCai').innerText = `${cai} 才`;
+            document.getElementById('stonePrice').innerText = `$${stonePrice.toLocaleString()}`;
+            document.getElementById('edgePrice').innerText = `$${edgePrice.toLocaleString()}`;
+            document.getElementById('sinkPrice').innerText = `$${sinkPrice.toLocaleString()}`;
+            document.getElementById('totalPrice').innerText = `$${totalPrice.toLocaleString()}`;
+
+            draw2D(length, width);
+            drawSection();
+        }
+
+        function draw2D(l, w) {
+            const canvas = document.getElementById('canvas2D');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const margin = 40;
+            const maxW = canvas.width - margin * 2;
+            const maxH = canvas.height - margin * 2;
+            const scale = Math.min(maxW / l, maxH / w);
+
+            const rectW = l * scale;
+            const rectH = w * scale;
+            const x = (canvas.width - rectW) / 2;
+            const y = (canvas.height - rectH) / 2;
+
+            ctx.fillStyle = '#EAEAEA';
+            ctx.strokeStyle = '#33363B';
+            ctx.lineWidth = 2;
+            ctx.fillRect(x, y, rectW, rectH);
+            ctx.strokeRect(x, y, rectW, rectH);
+
+            const sinkW = Math.min(70 * scale, rectW * 0.4);
+            const sinkH = Math.min(45 * scale, rectH * 0.7);
+            const sinkX = x + rectW * 0.2;
+            const sinkY = y + (rectH - sinkH) / 2;
+
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = '#E29D29';
+            ctx.strokeRect(sinkX, sinkY, sinkW, sinkH);
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#E29D29';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('水槽開孔區', sinkX + 5, sinkY + 20);
+
+            if (l > 240) {
+                const seamX = x + (240 * scale);
+                ctx.strokeStyle = '#FF4D4F';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([2, 2]);
+                ctx.beginPath();
+                ctx.moveTo(seamX, y);
+                ctx.lineTo(seamX, y + rectH);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = '#FF4D4F';
+                ctx.fillText('拼接縫', seamX - 20, y - 5);
+            }
+
+            ctx.fillStyle = '#33363B';
+            ctx.font = '12px sans-serif';
+            ctx.fillText(`${l} cm`, canvas.width / 2 - 15, y - 10);
+            ctx.fillText(`${w} cm`, x - 35, canvas.height / 2);
+        }
+
+        function drawSection() {
+            const canvas = document.getElementById('canvasSection');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const type = document.getElementById('sinkInstall').value;
+
+            ctx.fillStyle = '#D9D9D9';
+            ctx.strokeStyle = '#33363B';
+            ctx.lineWidth = 2;
+
+            ctx.fillRect(50, 40, 150, 20);
+            ctx.strokeRect(50, 40, 150, 20);
+
+            ctx.fillRect(300, 40, 150, 20);
+            ctx.strokeRect(300, 40, 150, 20);
+
+            ctx.strokeStyle = '#E29D29';
+            ctx.lineWidth = 3;
+
+            if (type === '2500') {
+                ctx.beginPath();
+                ctx.moveTo(80, 65);
+                ctx.lineTo(200, 65);
+                ctx.lineTo(200, 100);
+                ctx.lineTo(300, 100);
+                ctx.lineTo(300, 65);
+                ctx.lineTo(420, 65);
+                ctx.stroke();
+                ctx.fillStyle = '#E29D29';
+                ctx.font = '12px sans-serif';
+                ctx.fillText('下嵌式剖面：水槽於石材下方懸掛固定', 120, 125);
+            } else if (type === '1500') {
+                ctx.beginPath();
+                ctx.moveTo(80, 35);
+                ctx.lineTo(205, 35);
+                ctx.lineTo(205, 90);
+                ctx.lineTo(295, 90);
+                ctx.lineTo(295, 35);
+                ctx.lineTo(420, 35);
+                ctx.stroke();
+                ctx.fillStyle = '#E29D29';
+                ctx.font = '12px sans-serif';
+                ctx.fillText('上嵌式剖面：水槽金屬邊框平壓於石材上方', 110, 125);
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(80, 40);
+                ctx.lineTo(200, 40);
+                ctx.lineTo(200, 90);
+                ctx.lineTo(300, 90);
+                ctx.lineTo(300, 40);
+                ctx.lineTo(420, 40);
+                ctx.stroke();
+                ctx.fillStyle = '#E29D29';
+                ctx.font = '12px sans-serif';
+                ctx.fillText('平接式剖面：石材洗溝銑邊，水槽與檯面完全平齊', 90, 125);
+            }
+        }
+
+        calculate();
+    </script>
+</body>
+</html>
